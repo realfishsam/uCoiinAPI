@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="google-signin-scope" content="profile email">
+        <meta name="google-signin-client_id" content="431133908652-higemq50v7nonm6pqhj7o7eadq62qi64.apps.googleusercontent.com">
+        <script src="https://apis.google.com/js/platform.js" async defer></script>
+    </head>
+    <body>
+        <div id="status"></div>
+        <script>
+            var editorExtensionId = "nkiphmfmhhchpdoedcihfoknbiaijflm";
+            window.fbAsyncInit = function() {
+                FB.init({
+                    appId      : '279083157732633',
+                    cookie     : true,
+                    xfbml      : true,
+                    version    : 'v13.0'
+                });
+                    
+                FB.AppEvents.logPageView();  
+                
+                async function statusChangeCallback(response) {
+                    if (response.status === 'connected') {
+                        // Logged into your app and Facebook.
+                        // console.log('Welcome!  Fetching your information.... ');
+                        FB.api('/me', function (response) {
+            
+                            var editorExtensionId = "nkiphmfmhhchpdoedcihfoknbiaijflm"; //uCoiin MV2
+            
+                            // Make a simple request:
+                            chrome.runtime.sendMessage(editorExtensionId, {id: response.id, name: response.name},
+                            function(response) {
+                                if (!response.success)
+                                handleError(url);
+                            });
+            
+                            usr = JSON.stringify(response);
+                            console.log(usr);
+            
+                            const ws = new WebSocket("wss://ucoiin.com/websocket");
+            
+                            ws.onopen = () => {
+                            // console.log("Socket established");
+                            ws.send(JSON.stringify(response));
+                            ws.close();
+            
+                            window.close();
+                            };
+                            // window.close();
+                        });
+                    } else {
+                    }
+            
+                }
+            
+                FB.getLoginStatus(function(response) {
+                    // console.log("RESPONSE2")
+                    statusChangeCallback(response);
+                    // console.log(response);
+                        }
+                    );
+                
+            };
+            
+            (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+        </script>
+        <div id="fb-root"></div>
+        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v13.0&appId=279083157732633&autoLogAppEvents=1" nonce="ItnNwknl"></script>
+        <div>
+            <link href="signin.css" rel="stylesheet" />
+            <div class="home-container">
+                <img
+                    alt="image"
+                    src="logo.png"
+                    class="home-image"
+                    />
+                <div class="home-container1">
+                    <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark" id="my-signin2"></div>
+                    <script>
+                        function renderButton() {
+                            gapi.signin2.render('my-signin2', {
+                                "width": "275px",
+                                "height": "40px",
+                                "longtitle": "true",
+                                "onsuccess": "onSuccess",
+                                "onfailure": "onFailure",
+                            })};
+                        
+                        async function onSignIn(googleUser) {
+                            // Useful data for your client-side scripts:
+                            var profile = googleUser.getBasicProfile();
+                            /*
+                            console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+                            console.log('Full Name: ' + profile.getName());
+                            console.log('Given Name: ' + profile.getGivenName());
+                            console.log('Family Name: ' + profile.getFamilyName());
+                            console.log("Image URL: " + profile.getImageUrl());
+                            console.log("Email: " + profile.getEmail());
+                            */
+                        
+                            // The ID token you need to pass to your backend:
+                            var id_token = googleUser.getAuthResponse().id_token;
+                            // console.log("ID Token: " + id_token);
+                        
+                            var editorExtensionId = "nkiphmfmhhchpdoedcihfoknbiaijflm"; //uCoiin MV2
+                        
+                            // Make a simple request:
+                            chrome.runtime.sendMessage(editorExtensionId, {id: id_token, name: googleUser.getAuthResponse().GivenName},
+                            function(response) {
+                                if (!response.success)
+                                handleError(url);
+                            });
+                            // google id tokens are too long so we need mongoDB to create an _id for us.
+                            let usr = {
+                            _id: `${id_token}`,
+                            Name: `${profile.getName()}`,
+                            GivenName: `${profile.getGivenName()}`,
+                            FamilyName: `${profile.getFamilyName()}`,
+                            ImageUrl: `${profile.getImageUrl()}`,
+                            Email: `${profile.getEmail()}`,                        
+                            id_token: `${id_token}`,
+                            };
+                            console.log(usr);
+                        
+                            usr = JSON.stringify(usr);
+                            // console.log(usr);
+                        
+                            // The ID of the extension we want to talk to.
+                        
+                            const ws = new WebSocket("wss://ucoiin.com/websocket");
+                        
+                            ws.onopen = () => {
+                                console.log // ("Socket established");
+                                ws.send(usr);
+                                ws.close();
+                                window.close();
+                                };
+                        
+                        }
+                        
+                        // window.close();
+                        
+                        
+                    </script>
+                    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+                    <div class="fb-login-button" data-width="275" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div>
+                    <img
+                        alt="image"
+                        src="panda.jpg"
+                        class="home-image1"
+                        />
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
